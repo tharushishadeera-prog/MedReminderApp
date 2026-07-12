@@ -45,7 +45,7 @@ npx expo start
 How to Test
 Using Expo Go: Scan the QR code generated in your terminal (Note: Push notifications require a Development Build).
 
-Using APK: [You can download the latest build from the link below](https://expo.dev/artifacts/eas/wqBn2lrX_r7rwUJvawZLN51jm337LRH8XrRs3rF3C5g.aab).
+Using APK: [You can download the latest build from the link below][(https://expo.dev/artifacts/eas/wqBn2lrX_r7rwUJvawZLN51jm337LRH8XrRs3rF3C5g.aab).](https://expo.dev/accounts/shadeera/projects/MedReminderApp/builds/df107791-9276-4cf9-bf03-ce5ace660eaf)
 
 Build Link
 You can download the Android APK here:
