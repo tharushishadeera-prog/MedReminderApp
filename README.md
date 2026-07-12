@@ -1,4 +1,7 @@
-MedReminder App 💊
+      MedReminder App 💊
+
+
+      
 This is a mobile application developed to help users manage their medicine schedules effectively. It provides timely reminders to ensure users never miss a dose.
 
 Features
