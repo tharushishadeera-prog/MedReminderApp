@@ -1,138 +1,119 @@
-import React from "react";
+import React, {
+    useContext
+} from "react";
 
 import {
-    TouchableOpacity,
     View,
     Text,
-    StyleSheet,
+    TouchableOpacity,
+    StyleSheet
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 
-type Props = {
-    icon: keyof typeof Ionicons.glyphMap;
-    title: string;
-    onPress: () => void;
-    color?: string;
-};
+import {
+    ThemeContext
+} from "../context/ThemeContext";
+
+
 
 export default function ProfileMenuItem({
     icon,
     title,
-    onPress,
-    color = "#4F46E5",
-}: Props) {
+    onPress
+}: any) {
+
+
+    const {
+        colors
+    } = useContext(ThemeContext);
+
+
 
     return (
 
         <TouchableOpacity
-            style={styles.container}
-            activeOpacity={0.8}
+
+            style={[
+                styles.item,
+                {
+                    backgroundColor: colors.card
+                }
+            ]}
+
             onPress={onPress}
+
         >
 
-            <View style={styles.leftContainer}>
-
-                <View style={styles.iconContainer}>
-
-                    <Ionicons
-                        name={icon}
-                        size={22}
-                        color={color}
-                    />
-
-                </View>
-
-                <Text style={styles.title}>
-                    {title}
-                </Text>
-
-            </View>
 
             <Ionicons
-                name="chevron-forward"
-                size={22}
-                color="#9CA3AF"
+
+                name={icon}
+
+                size={24}
+
+                color={colors.primary}
+
             />
 
+
+            <Text
+
+                style={[
+                    styles.title,
+                    {
+                        color: colors.text
+                    }
+                ]}
+
+            >
+
+                {title}
+
+            </Text>
+
+
+            <Ionicons
+
+                name="chevron-forward"
+
+                size={20}
+
+                color={colors.subText}
+
+            />
+
+
         </TouchableOpacity>
+
 
     );
 
 }
 
+
+
 const styles = StyleSheet.create({
 
-    container: {
+    item: {
 
         flexDirection: "row",
-
-        justifyContent: "space-between",
-
         alignItems: "center",
-
-        backgroundColor: "#FFFFFF",
-
+        padding: 18,
         marginHorizontal: 20,
-
-        marginBottom: 15,
-
-        paddingVertical: 16,
-
-        paddingHorizontal: 18,
-
-        borderRadius: 18,
-
-        elevation: 2,
-
-        shadowColor: "#000",
-
-        shadowOpacity: 0.08,
-
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-
-        shadowRadius: 4,
-    },
-
-    leftContainer: {
-
-        flexDirection: "row",
-
-        alignItems: "center",
-
-        flex: 1,
+        marginBottom: 12,
+        borderRadius: 15
 
     },
 
-    iconContainer: {
-
-        width: 42,
-
-        height: 42,
-
-        borderRadius: 12,
-
-        backgroundColor: "#EEF2FF",
-
-        justifyContent: "center",
-
-        alignItems: "center",
-
-        marginRight: 15,
-
-    },
 
     title: {
 
+        flex: 1,
+        marginLeft: 15,
         fontSize: 16,
+        fontWeight: "600"
 
-        fontWeight: "600",
-
-        color: "#111827",
-
-    },
+    }
 
 });

@@ -1,97 +1,139 @@
-// import * as Notifications from "expo-notifications";
+import * as Notifications from "expo-notifications";
 
 
+// Notification display settings
 
-// export async function registerNotification() {
+Notifications.setNotificationHandler({
 
+    handleNotification: async () => ({
 
-//     const { status } =
-//         await Notifications.requestPermissionsAsync();
+        shouldShowBanner: true,
 
+        shouldShowList: true,
 
-//     if (status !== "granted") {
+        shouldPlaySound: true,
 
-//         alert("Notification permission denied");
+        shouldSetBadge: false,
 
-//         return false;
+    }),
 
-//     }
-
-
-//     return true;
-
-// }
+});
 
 
 
 
-// export async function scheduleMedicineReminder(
-//     medicine: any
-// ) {
+// Request permission
+
+export const requestNotificationPermission = async () => {
 
 
-//     await Notifications.scheduleNotificationAsync({
-
-//         content: {
-
-//             title: "💊 Medicine Reminder",
-
-//             body:
-//                 `${medicine.name} - ${medicine.dosage}`
-
-//         },
+    const { status } =
+        await Notifications.requestPermissionsAsync();
 
 
-//         trigger: {
 
-//             hour:
-//                 getHour(medicine.time),
+    if (status !== "granted") {
 
-//             minute:
-//                 getMinute(medicine.time),
+        console.log(
+            "Notification permission denied"
+        );
 
-//             repeats: true
+        return false;
 
-//         } as any
-
-
-//     });
+    }
 
 
-// }
+    return true;
+
+};
 
 
 
 
 
-// function getHour(time: string) {
+// Schedule medicine reminder
+
+export const scheduleMedicineReminder = async (
+
+    medicine: any
+
+) => {
 
 
-//     const [hour, minutePeriod] = time.split(":");
+    if (!medicine.reminder) {
 
-//     let h = parseInt(hour);
+        return;
 
-
-//     if (time.includes("PM") && h !== 12) {
-
-//         h += 12;
-
-//     }
-
-
-//     return h;
-
-// }
+    }
 
 
 
-// function getMinute(time: string) {
+    const [time, period] =
+        medicine.time.split(" ");
 
 
-//     const minute =
-//         time.split(":")[1].split(" ")[0];
+
+    let [
+        hour,
+        minute
+    ] =
+        time.split(":")
+            .map(Number);
 
 
-//     return parseInt(minute);
 
-// }
+    if (period === "PM" && hour !== 12) {
+
+        hour += 12;
+
+    }
+
+
+    if (period === "AM" && hour === 12) {
+
+        hour = 0;
+
+    }
+
+
+
+
+    await Notifications.scheduleNotificationAsync({
+
+        content: {
+
+
+            title: "💊 Medicine Reminder",
+
+            body:
+                `Time to take ${medicine.name} (${medicine.dosage})`,
+
+
+            sound: true,
+
+        },
+
+
+        trigger: {
+
+
+            hour: hour,
+
+            minute: minute,
+
+            repeats: true,
+
+
+        } as any
+
+
+    });
+
+
+
+    console.log(
+        "Notification scheduled"
+    );
+
+
+};

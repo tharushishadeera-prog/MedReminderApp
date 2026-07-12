@@ -1,6 +1,7 @@
 import React, {
     useCallback,
-    useState
+    useState,
+    useContext
 } from "react";
 
 
@@ -13,9 +14,15 @@ import {
 } from "react-native";
 
 
+import {
+    ThemeContext
+} from "../context/ThemeContext";
+
+
 import { LinearGradient } from "expo-linear-gradient";
 
 import { auth } from "../firebase/firebaseConfig";
+
 
 import {
     useFocusEffect
@@ -41,12 +48,19 @@ import {
 
 
 
+
 export default function Home() {
+
+
+    const {
+        colors
+    } = useContext(ThemeContext);
 
 
 
     const [medicines, setMedicines] =
         useState<any[]>([]);
+
 
 
 
@@ -60,7 +74,9 @@ export default function Home() {
             const loadMedicines = async () => {
 
 
-                const user = auth.currentUser;
+                const user =
+                    auth.currentUser;
+
 
 
                 if (user) {
@@ -84,7 +100,6 @@ export default function Home() {
             loadMedicines();
 
 
-
         }, [])
 
     );
@@ -93,9 +108,6 @@ export default function Home() {
 
 
 
-
-
-    // Convert time to minutes
 
     const convertTime = (time: string) => {
 
@@ -124,6 +136,7 @@ export default function Home() {
         }
 
 
+
         if (period === "AM" && hour === 12) {
 
             hour = 0;
@@ -133,11 +146,8 @@ export default function Home() {
 
 
         return (
-            hour * 60
-            +
-            minute
+            hour * 60 + minute
         );
-
 
     };
 
@@ -147,22 +157,18 @@ export default function Home() {
 
 
 
-
-    // Find next reminder
-
     const getNextReminder = () => {
 
 
-        const pendingMedicines =
+        const pending =
             medicines.filter(
-                medicine =>
-                    !medicine.taken
+                item => !item.taken
             );
 
 
 
         if (
-            pendingMedicines.length === 0
+            pending.length === 0
         ) {
 
             return null;
@@ -171,19 +177,14 @@ export default function Home() {
 
 
 
-
-
         const sorted =
-            pendingMedicines.sort(
-                (a, b) => {
+            pending.sort(
+                (a, b) =>
 
-                    return (
-                        convertTime(a.time)
-                        -
-                        convertTime(b.time)
-                    );
+                    convertTime(a.time)
+                    -
+                    convertTime(b.time)
 
-                }
             );
 
 
@@ -199,16 +200,9 @@ export default function Home() {
 
 
 
-
     const handleTaken = async (
         id: string
     ) => {
-
-
-        console.log(
-            "Take clicked:",
-            id
-        );
 
 
         const user =
@@ -232,7 +226,6 @@ export default function Home() {
                 );
 
 
-
             setMedicines(data);
 
 
@@ -240,7 +233,6 @@ export default function Home() {
 
 
     };
-
 
 
 
@@ -276,12 +268,11 @@ export default function Home() {
             );
 
 
-
         setMedicines(data);
 
 
-
     };
+
 
 
 
@@ -293,8 +284,19 @@ export default function Home() {
 
 
         <SafeAreaView
-            style={styles.container}
+
+
+            style={[
+                styles.container,
+                {
+                    backgroundColor:
+                        colors.background
+                }
+            ]}
+
+
         >
+
 
 
             <ScrollView
@@ -305,12 +307,15 @@ export default function Home() {
 
 
 
+
                 <LinearGradient
+
 
                     colors={[
                         "#1E1B4B",
                         "#312E81"
                     ]}
+
 
                     style={styles.header}
 
@@ -318,19 +323,24 @@ export default function Home() {
                 >
 
 
+
                     <Header />
+
 
 
 
                     <ReminderCard
 
+
                         medicine={
                             getNextReminder()
                         }
 
+
                         onTake={
                             handleTaken
                         }
+
 
                     />
 
@@ -344,14 +354,39 @@ export default function Home() {
 
 
 
+                <View
 
-                <View style={styles.stats}>
+                    style={styles.stats}
+
+                >
 
 
-                    <View style={styles.statBox}>
 
 
-                        <Text>
+
+                    <View
+
+
+                        style={[
+                            styles.statBox,
+                            {
+                                backgroundColor:
+                                    colors.card
+                            }
+                        ]}
+
+
+                    >
+
+
+                        <Text
+
+                            style={{
+                                color:
+                                    colors.text
+                            }}
+
+                        >
 
                             {medicines.length}
 
@@ -359,6 +394,7 @@ export default function Home() {
 
                             Medicines
 
+
                         </Text>
 
 
@@ -369,22 +405,42 @@ export default function Home() {
 
 
 
-                    <View style={styles.statBox}>
+
+                    <View
 
 
-                        <Text>
+                        style={[
+                            styles.statBox,
+                            {
+                                backgroundColor:
+                                    colors.card
+                            }
+                        ]}
+
+
+                    >
+
+
+                        <Text
+
+                            style={{
+                                color:
+                                    colors.text
+                            }}
+
+                        >
 
                             {
                                 medicines.filter(
                                     m => m.taken
-                                )
-                                    .length
+                                ).length
                             }
 
                             {"\n"}
 
                             Taken
 
+
                         </Text>
 
 
@@ -396,19 +452,35 @@ export default function Home() {
 
 
 
-                    <View style={styles.statBox}>
+                    <View
 
 
-                        <Text>
+                        style={[
+                            styles.statBox,
+                            {
+                                backgroundColor:
+                                    colors.card
+                            }
+                        ]}
 
+
+                    >
+
+
+                        <Text
+
+                            style={{
+                                color:
+                                    colors.text
+                            }}
+
+                        >
 
                             {
                                 medicines.filter(
                                     m => !m.taken
-                                )
-                                    .length
+                                ).length
                             }
-
 
                             {"\n"}
 
@@ -431,11 +503,26 @@ export default function Home() {
 
 
 
-                <Text style={styles.sectionTitle}>
+
+                <Text
+
+
+                    style={[
+                        styles.sectionTitle,
+                        {
+                            color:
+                                colors.text
+                        }
+                    ]}
+
+
+                >
 
                     Today's Schedule
 
+
                 </Text>
+
 
 
 
@@ -450,6 +537,7 @@ export default function Home() {
                         ?
 
                         medicines.map(
+
                             medicine => (
 
 
@@ -481,23 +569,40 @@ export default function Home() {
 
                             )
 
+
                         )
+
 
                         :
 
-                        <Text style={styles.emptyText}>
+
+                        <Text
+
+
+                            style={[
+                                styles.emptyText,
+                                {
+                                    color:
+                                        colors.subText
+                                }
+                            ]}
+
+
+                        >
 
                             No medicines added yet 💊
 
+
                         </Text>
+
 
                 }
 
 
 
 
-
             </ScrollView>
+
 
 
 
@@ -521,17 +626,15 @@ export default function Home() {
 
 
 
-
 const styles = StyleSheet.create({
 
 
     container: {
 
-        flex: 1,
-
-        backgroundColor: "#F9FAFB"
+        flex: 1
 
     },
+
 
 
     header: {
@@ -547,6 +650,7 @@ const styles = StyleSheet.create({
     },
 
 
+
     stats: {
 
         flexDirection: "row",
@@ -560,8 +664,6 @@ const styles = StyleSheet.create({
 
 
     statBox: {
-
-        backgroundColor: "white",
 
         width: "28%",
 
@@ -591,14 +693,11 @@ const styles = StyleSheet.create({
 
         textAlign: "center",
 
-        color: "#6B7280",
-
         marginTop: 20,
 
         fontSize: 16
 
     }
-
 
 
 });

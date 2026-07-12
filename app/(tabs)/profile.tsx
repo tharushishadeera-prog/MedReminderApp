@@ -1,4 +1,11 @@
 import React from "react";
+import {
+    useContext
+} from "react";
+
+import {
+    ThemeContext
+} from "../context/ThemeContext";
 
 import {
     SafeAreaView,
@@ -15,6 +22,12 @@ import ProfileMenuItem from "../components/ProfileMenuItem";
 import LogoutButton from "../components/LogoutButton";
 
 export default function Profile() {
+    const {
+        darkMode,
+        toggleTheme
+
+    } = useContext(ThemeContext);
+
 
     return (
 
@@ -55,9 +68,19 @@ export default function Profile() {
                     />
 
                     <ProfileMenuItem
+
                         icon="moon-outline"
-                        title="Dark Mode"
-                        onPress={() => { }}
+
+                        title={
+                            darkMode
+                                ?
+                                "Light Mode"
+                                :
+                                "Dark Mode"
+                        }
+
+                        onPress={toggleTheme}
+
                     />
 
                     <ProfileMenuItem

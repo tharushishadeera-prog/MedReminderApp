@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { auth, db } from "./firebase/firebaseConfig";
+import { updateProfile } from "firebase/auth";
 
 import {
     doc,
@@ -65,9 +66,12 @@ export default function EditProfile() {
 
         const user = auth.currentUser;
 
+
         if (!user) return;
 
+
         try {
+
 
             await updateDoc(
 
@@ -84,24 +88,43 @@ export default function EditProfile() {
 
             );
 
+
+            // Update Firebase Auth name
+
+            await updateProfile(
+
+                user,
+
+                {
+                    displayName: name
+                }
+
+            );
+
+
+
             Alert.alert(
                 "Success",
-                "Profile updated successfully."
+                "Profile updated successfully"
             );
+
 
             router.back();
 
+
+
         } catch (error: any) {
+
 
             Alert.alert(
                 "Error",
                 error.message
             );
 
+
         }
 
     };
-
     return (
 
         <SafeAreaView style={styles.container}>
