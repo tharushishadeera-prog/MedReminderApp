@@ -21,6 +21,7 @@ import {
 
 import { LinearGradient } from "expo-linear-gradient";
 
+
 import { auth } from "../firebase/firebaseConfig";
 
 
@@ -65,7 +66,6 @@ export default function Home() {
 
 
 
-
     useFocusEffect(
 
         useCallback(() => {
@@ -97,7 +97,9 @@ export default function Home() {
             };
 
 
+
             loadMedicines();
+
 
 
         }, [])
@@ -109,7 +111,9 @@ export default function Home() {
 
 
 
-    const convertTime = (time: string) => {
+    const convertTime = (
+        time: string
+    ) => {
 
 
         const [
@@ -129,28 +133,21 @@ export default function Home() {
 
 
 
-        if (period === "PM" && hour !== 12) {
 
+        if (period === "PM" && hour !== 12)
             hour += 12;
 
-        }
 
 
-
-        if (period === "AM" && hour === 12) {
-
+        if (period === "AM" && hour === 12)
             hour = 0;
 
-        }
 
 
+        return hour * 60 + minute;
 
-        return (
-            hour * 60 + minute
-        );
 
     };
-
 
 
 
@@ -167,33 +164,50 @@ export default function Home() {
 
 
 
-        if (
-            pending.length === 0
-        ) {
-
+        if (pending.length === 0)
             return null;
 
-        }
 
 
-
-        const sorted =
-            pending.sort(
-                (a, b) =>
-
-                    convertTime(a.time)
-                    -
-                    convertTime(b.time)
-
-            );
-
-
-
-        return sorted[0];
+        return pending.sort(
+            (a, b) =>
+                convertTime(a.time)
+                -
+                convertTime(b.time)
+        )[0];
 
 
     };
 
+
+
+
+
+
+
+    const refreshData = async () => {
+
+
+        const user =
+            auth.currentUser;
+
+
+
+        if (user) {
+
+
+            const data =
+                await getMedicines(
+                    user.uid
+                );
+
+
+            setMedicines(data);
+
+        }
+
+
+    };
 
 
 
@@ -219,21 +233,13 @@ export default function Home() {
             );
 
 
-
-            const data =
-                await getMedicines(
-                    user.uid
-                );
-
-
-            setMedicines(data);
+            refreshData();
 
 
         }
 
 
     };
-
 
 
 
@@ -251,7 +257,8 @@ export default function Home() {
 
 
 
-        if (!user) return;
+        if (!user)
+            return;
 
 
 
@@ -261,17 +268,11 @@ export default function Home() {
         );
 
 
-
-        const data =
-            await getMedicines(
-                user.uid
-            );
-
-
-        setMedicines(data);
+        refreshData();
 
 
     };
+
 
 
 
@@ -285,7 +286,6 @@ export default function Home() {
 
         <SafeAreaView
 
-
             style={[
                 styles.container,
                 {
@@ -293,7 +293,6 @@ export default function Home() {
                         colors.background
                 }
             ]}
-
 
         >
 
@@ -308,14 +307,13 @@ export default function Home() {
 
 
 
+
                 <LinearGradient
 
-
                     colors={[
-                        "#1E1B4B",
-                        "#312E81"
+                        "#a1e7df",
+                        "#62c5c7"
                     ]}
-
 
                     style={styles.header}
 
@@ -323,24 +321,38 @@ export default function Home() {
                 >
 
 
-
                     <Header />
+
+
+
+                    <View style={styles.welcome}>
+
+
+                        <Text style={styles.smallText}>
+                            Stay healthy today 💙
+                        </Text>
+
+
+                        <Text style={styles.bigText}>
+                            Manage your medicines
+                        </Text>
+
+
+                    </View>
+
 
 
 
 
                     <ReminderCard
 
-
                         medicine={
                             getNextReminder()
                         }
 
-
                         onTake={
                             handleTaken
                         }
-
 
                     />
 
@@ -354,144 +366,60 @@ export default function Home() {
 
 
 
-                <View
 
-                    style={styles.stats}
 
-                >
+                <View style={styles.stats}>
 
 
+                    <StatCard
 
+                        icon="💊"
 
+                        value={
+                            medicines.length
+                        }
 
-                    <View
+                        label="Medicines"
 
+                        colors={colors}
 
-                        style={[
-                            styles.statBox,
-                            {
-                                backgroundColor:
-                                    colors.card
-                            }
-                        ]}
+                    />
 
 
-                    >
 
+                    <StatCard
 
-                        <Text
+                        icon="✅"
 
-                            style={{
-                                color:
-                                    colors.text
-                            }}
+                        value={
+                            medicines.filter(
+                                m => m.taken
+                            ).length
+                        }
 
-                        >
+                        label="Taken"
 
-                            {medicines.length}
+                        colors={colors}
 
-                            {"\n"}
+                    />
 
-                            Medicines
 
 
-                        </Text>
+                    <StatCard
 
+                        icon="⏰"
 
-                    </View>
+                        value={
+                            medicines.filter(
+                                m => !m.taken
+                            ).length
+                        }
 
+                        label="Pending"
 
+                        colors={colors}
 
-
-
-
-
-                    <View
-
-
-                        style={[
-                            styles.statBox,
-                            {
-                                backgroundColor:
-                                    colors.card
-                            }
-                        ]}
-
-
-                    >
-
-
-                        <Text
-
-                            style={{
-                                color:
-                                    colors.text
-                            }}
-
-                        >
-
-                            {
-                                medicines.filter(
-                                    m => m.taken
-                                ).length
-                            }
-
-                            {"\n"}
-
-                            Taken
-
-
-                        </Text>
-
-
-                    </View>
-
-
-
-
-
-
-
-                    <View
-
-
-                        style={[
-                            styles.statBox,
-                            {
-                                backgroundColor:
-                                    colors.card
-                            }
-                        ]}
-
-
-                    >
-
-
-                        <Text
-
-                            style={{
-                                color:
-                                    colors.text
-                            }}
-
-                        >
-
-                            {
-                                medicines.filter(
-                                    m => !m.taken
-                                ).length
-                            }
-
-                            {"\n"}
-
-                            Pending
-
-
-                        </Text>
-
-
-                    </View>
-
+                    />
 
 
                 </View>
@@ -502,24 +430,19 @@ export default function Home() {
 
 
 
-
-
                 <Text
 
-
                     style={[
-                        styles.sectionTitle,
+                        styles.section,
                         {
                             color:
                                 colors.text
                         }
                     ]}
 
-
                 >
 
                     Today's Schedule
-
 
                 </Text>
 
@@ -529,74 +452,76 @@ export default function Home() {
 
 
 
-
                 {
-
                     medicines.length > 0
 
                         ?
 
                         medicines.map(
-
                             medicine => (
 
 
                                 <MedicineItem
 
-
                                     key={
                                         medicine.id
                                     }
-
 
                                     medicine={
                                         medicine
                                     }
 
-
                                     onTake={
                                         handleTaken
                                     }
-
 
                                     onDelete={
                                         handleDelete
                                     }
 
-
                                 />
 
 
                             )
-
-
                         )
 
 
                         :
 
 
-                        <Text
-
+                        <View
 
                             style={[
-                                styles.emptyText,
+                                styles.empty,
                                 {
-                                    color:
-                                        colors.subText
+                                    backgroundColor:
+                                        colors.card
                                 }
                             ]}
 
-
                         >
 
-                            No medicines added yet 💊
+                            <Text>
+                                💊
+                            </Text>
+
+                            <Text
+                                style={{
+                                    color:
+                                        colors.text
+                                }}
+                            >
+                                No medicines added yet
+                            </Text>
 
 
-                        </Text>
+                        </View>
 
 
                 }
+
+
+
 
 
 
@@ -607,9 +532,7 @@ export default function Home() {
 
 
 
-
             <FloatingButton />
-
 
 
         </SafeAreaView>
@@ -625,14 +548,86 @@ export default function Home() {
 
 
 
+function StatCard({
+    icon,
+    value,
+    label,
+    colors
+}: any) {
+
+
+    return (
+
+        <View
+
+            style={[
+                styles.statCard,
+                {
+                    backgroundColor:
+                        colors.card
+                }
+            ]}
+
+        >
+
+
+            <Text style={styles.icon}>
+                {icon}
+            </Text>
+
+
+            <Text
+
+                style={[
+                    styles.value,
+                    {
+                        color:
+                            colors.text
+                    }
+                ]}
+
+            >
+
+                {value}
+
+            </Text>
+
+
+            <Text
+
+                style={{
+                    color:
+                        colors.subText
+                }}
+
+            >
+
+                {label}
+
+            </Text>
+
+
+
+        </View>
+
+    );
+
+
+}
+
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
 
 
+
     container: {
-
         flex: 1
-
     },
 
 
@@ -641,13 +636,49 @@ const styles = StyleSheet.create({
 
         padding: 25,
 
-        borderBottomLeftRadius: 30,
+        borderBottomLeftRadius: 35,
 
-        borderBottomRightRadius: 30,
+        borderBottomRightRadius: 35,
 
         paddingBottom: 40
 
     },
+
+
+
+
+    welcome: {
+
+        marginTop: 25,
+
+        marginBottom: 20
+
+    },
+
+
+
+    smallText: {
+
+        color: "#101113",
+
+        fontSize: 14
+
+    },
+
+
+
+    bigText: {
+
+        color: "#070707",
+
+        fontSize: 22,
+
+        fontWeight: "bold",
+
+        marginTop: 5
+
+    },
+
 
 
 
@@ -663,41 +694,70 @@ const styles = StyleSheet.create({
 
 
 
-    statBox: {
 
-        width: "28%",
+    statCard: {
+
+        width: "30%",
 
         padding: 15,
 
-        borderRadius: 16,
+        borderRadius: 20,
 
-        alignItems: "center"
+        alignItems: "center",
+
+        elevation: 4
 
     },
 
 
 
-    sectionTitle: {
 
-        fontSize: 18,
+    icon: {
+
+        fontSize: 25
+
+    },
+
+
+
+    value: {
+
+        fontSize: 25,
 
         fontWeight: "bold",
 
-        margin: 20
+        marginTop: 5
 
     },
 
 
 
-    emptyText: {
+    section: {
 
-        textAlign: "center",
+        fontSize: 20,
 
-        marginTop: 20,
+        fontWeight: "bold",
 
-        fontSize: 16
+        marginHorizontal: 20,
+
+        marginBottom: 15
+
+    },
+
+
+
+    empty: {
+
+        margin: 20,
+
+        padding: 30,
+
+        borderRadius: 20,
+
+        alignItems: "center"
 
     }
+
 
 
 });

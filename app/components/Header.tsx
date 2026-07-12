@@ -51,7 +51,7 @@ export default function Header() {
             <Ionicons
                 name="notifications"
                 size={25}
-                color="white"
+                color="brown"
             />
 
 
@@ -73,13 +73,13 @@ const styles = StyleSheet.create({
 
 
     greeting: {
-        color: "#D1D5DB",
+        color: "#0c0e0f",
         fontSize: 15,
     },
 
 
     name: {
-        color: "white",
+        color: "black",
         fontSize: 24,
         fontWeight: "bold",
     }

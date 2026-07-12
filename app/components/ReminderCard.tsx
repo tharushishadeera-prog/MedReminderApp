@@ -1,4 +1,7 @@
-import React from "react";
+import React, {
+    useContext
+} from "react";
+
 
 import {
     View,
@@ -8,54 +11,253 @@ import {
 } from "react-native";
 
 
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+
+import {
+    ThemeContext
+} from "../context/ThemeContext";
+
+
+
+
 export default function ReminderCard({
+
     medicine,
+
     onTake
+
 }: any) {
+
+
+
+    const {
+        colors
+    } = useContext(ThemeContext);
+
+
 
 
     if (!medicine) {
 
+
         return (
 
-            <View style={styles.card}>
+            <View
 
-                <Text style={styles.label}>
-                    Next Reminder
+                style={[
+                    styles.card,
+                    {
+                        backgroundColor:
+                            colors.card
+                    }
+                ]}
+
+            >
+
+
+                <Text
+
+                    style={[
+                        styles.empty,
+                        {
+                            color:
+                                colors.text
+                        }
+                    ]}
+
+                >
+
+                    🎉 No upcoming reminders
+
+
                 </Text>
 
-                <Text>
-                    No reminders yet 💊
-                </Text>
 
             </View>
 
         );
 
+
     }
+
+
+
 
 
 
     return (
 
-        <View style={styles.card}>
+
+        <View
+
+            style={[
+                styles.card,
+                {
+                    backgroundColor:
+                        colors.card
+                }
+            ]}
+
+        >
 
 
-            <Text style={styles.label}>
-                Next Reminder
-            </Text>
 
 
 
-            <Text style={styles.time}>
-                {medicine.time}
-            </Text>
+            <View style={styles.top}>
+
+
+                <View style={styles.iconBox}>
+
+
+                    <Text style={styles.icon}>
+                        💊
+                    </Text>
+
+
+                </View>
 
 
 
-            <Text style={styles.med}>
-                {medicine.name} • {medicine.dosage}
-            </Text>
+
+                <View style={{ flex: 1 }}>
+
+
+                    <Text
+
+                        style={[
+                            styles.label,
+                            {
+                                color:
+                                    colors.subText
+                            }
+                        ]}
+
+                    >
+
+                        Next Reminder
+
+                    </Text>
+
+
+
+
+                    <Text
+
+                        style={[
+                            styles.name,
+                            {
+                                color:
+                                    colors.text
+                            }
+                        ]}
+
+                    >
+
+                        {medicine.name}
+
+                    </Text>
+
+
+                </View>
+
+
+
+                <Ionicons
+
+                    name="alarm"
+
+                    size={28}
+
+                    color="#4F46E5"
+
+                />
+
+
+
+            </View>
+
+
+
+
+
+
+
+
+
+            <View style={styles.info}>
+
+
+                <View>
+
+
+                    <Text style={styles.infoLabel}>
+                        Dosage
+                    </Text>
+
+
+                    <Text
+
+                        style={[
+                            styles.infoText,
+                            {
+                                color:
+                                    colors.text
+                            }
+                        ]}
+
+                    >
+
+                        {medicine.dosage}
+
+                    </Text>
+
+
+                </View>
+
+
+
+
+
+
+                <View>
+
+
+                    <Text style={styles.infoLabel}>
+                        Time
+                    </Text>
+
+
+                    <Text
+
+                        style={[
+                            styles.infoText,
+                            {
+                                color:
+                                    colors.text
+                            }
+                        ]}
+
+                    >
+
+                        ⏰ {medicine.time}
+
+                    </Text>
+
+
+                </View>
+
+
+            </View>
+
+
+
+
+
+
 
 
 
@@ -63,23 +265,16 @@ export default function ReminderCard({
 
                 style={styles.button}
 
-                onPress={() =>
-                    onTake(medicine.id)
-                }
-
-                disabled={medicine.taken}
+                onPress={() => onTake(
+                    medicine.id
+                )}
 
             >
 
-                <Text style={styles.btnText}>
 
-                    {
-                        medicine.taken
-                            ?
-                            "Completed ✓"
-                            :
-                            "Take Now"
-                    }
+                <Text style={styles.buttonText}>
+
+                    ✓  Mark as Taken
 
                 </Text>
 
@@ -88,53 +283,206 @@ export default function ReminderCard({
 
 
 
+
+
         </View>
 
+
     );
+
 
 }
 
 
 
+
+
+
+
+
+
 const styles = StyleSheet.create({
 
+
+
     card: {
-        backgroundColor: "white",
+
+
+        borderRadius: 25,
+
         padding: 20,
-        borderRadius: 20,
+
+        marginTop: 10,
+
+        elevation: 5
+
     },
+
+
+
+
+
+    top: {
+
+
+        flexDirection: "row",
+
+        alignItems: "center"
+
+    },
+
+
+
+
+
+    iconBox: {
+
+
+        width: 55,
+
+        height: 55,
+
+        borderRadius: 18,
+
+        backgroundColor: "#EEF2FF",
+
+        justifyContent: "center",
+
+        alignItems: "center",
+
+        marginRight: 15
+
+
+    },
+
+
+
+    icon: {
+
+
+        fontSize: 30
+
+    },
+
+
+
 
 
     label: {
-        color: "#6B7280",
+
+
+        fontSize: 13
+
+
     },
 
 
-    time: {
-        fontSize: 28,
+
+
+
+    name: {
+
+
+        fontSize: 20,
+
         fontWeight: "bold",
-        marginVertical: 5
+
+        marginTop: 3
+
+
     },
 
 
-    med: {
-        color: "#374151",
+
+
+
+    info: {
+
+
+        flexDirection: "row",
+
+        justifyContent: "space-between",
+
+        marginTop: 25,
+
+        marginBottom: 20
+
+
     },
+
+
+
+
+    infoLabel: {
+
+
+        color: "#9CA3AF",
+
+        fontSize: 13
+
+
+    },
+
+
+
+
+    infoText: {
+
+
+        fontSize: 16,
+
+        fontWeight: "600",
+
+        marginTop: 5
+
+
+    },
+
+
+
 
 
     button: {
+
+
         backgroundColor: "#4F46E5",
-        padding: 12,
-        borderRadius: 12,
-        marginTop: 15,
+
+        padding: 15,
+
+        borderRadius: 16,
+
         alignItems: "center"
+
+
     },
 
 
-    btnText: {
-        color: "white",
+
+
+    buttonText: {
+
+
+        color: "#fff",
+
+        fontSize: 16,
+
         fontWeight: "bold"
+
+
+    },
+
+
+
+
+    empty: {
+
+
+        textAlign: "center",
+
+        fontSize: 15
+
     }
+
 
 
 });

@@ -1,174 +1,256 @@
-import React from "react";
-import { router } from "expo-router";
+import React, {
+    useContext
+} from "react";
+
 
 import {
     View,
     Text,
     TouchableOpacity,
-    Alert,
     StyleSheet
 } from "react-native";
 
-import { Ionicons } from "@expo/vector-icons";
+
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+
+import {
+    ThemeContext
+} from "../context/ThemeContext";
+
+
+
 
 
 export default function MedicineItem({
+
     medicine,
+
     onTake,
+
     onDelete
+
 }: any) {
+
+
+
+    const {
+        colors
+    } = useContext(ThemeContext);
+
+
+
+
 
     return (
 
-        <View style={styles.item}>
+
+        <View
+
+            style={[
+                styles.card,
+                {
+                    backgroundColor:
+                        colors.card
+                }
+            ]}
+
+        >
 
 
-            <View style={styles.icon} />
 
 
-            <View style={{ flex: 1 }}>
+
+
+            <View style={styles.row}>
+
+
+                <View style={styles.iconBox}>
+
+
+                    <Text style={styles.icon}>
+                        💊
+                    </Text>
+
+
+                </View>
+
+
+
+
+
+
+                <View style={styles.details}>
+
+
+                    <Text
+
+                        style={[
+                            styles.name,
+                            {
+                                color:
+                                    colors.text
+                            }
+                        ]}
+
+                    >
+
+                        {medicine.name}
+
+                    </Text>
+
+
+
+
+                    <Text
+
+                        style={[
+                            styles.dosage,
+                            {
+                                color:
+                                    colors.subText
+                            }
+                        ]}
+
+                    >
+
+                        {medicine.dosage}
+
+                    </Text>
+
+
+
+                </View>
+
+
+
+
 
 
                 <TouchableOpacity
 
-                    onPress={() =>
-
-                        router.push({
-
-                            pathname: "/medicine-details",
-
-                            params: {
-
-                                id: medicine.id,
-
-                                name: medicine.name,
-
-                                dosage: medicine.dosage,
-
-                                time: medicine.time,
-
-                                taken: String(medicine.taken)
-
-                            }
-
-                        })
-
-                    }
+                    onPress={() => onDelete(
+                        medicine.id
+                    )}
 
                 >
 
 
-                    <Text style={styles.name}>
-                        {medicine.name}
-                    </Text>
+                    <Ionicons
+
+                        name="trash-outline"
+
+                        size={22}
+
+                        color="#EF4444"
+
+                    />
 
 
                 </TouchableOpacity>
 
 
-                <Text style={styles.details}>
-                    {medicine.dosage} • {medicine.time}
-                </Text>
 
 
             </View>
-            <TouchableOpacity
 
-                style={{ marginRight: 15 }}
 
-                onPress={() => {
 
-                    Alert.alert(
 
-                        "Delete Medicine",
 
-                        `Delete ${medicine.name}?`,
 
-                        [
 
-                            {
-                                text: "Cancel",
-                                style: "cancel"
-                            },
 
-                            {
-                                text: "Delete",
+            <View style={styles.bottom}>
 
-                                style: "destructive",
 
-                                onPress: () => onDelete(medicine.id)
-                            }
+                <View style={styles.timeBox}>
 
-                        ]
 
-                    );
+                    <Ionicons
 
-                }}
+                        name="time-outline"
 
-            >
+                        size={18}
 
-                <Ionicons
-                    name="trash-outline"
-                    size={24}
-                    color="#EF4444"
-                />
+                        color="#4F46E5"
 
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={{ marginRight: 15 }}
-                onPress={() =>
-                    router.push({
-                        pathname: "/edit-medicine",
-                        params: {
-                            id: medicine.id,
-                            name: medicine.name,
-                            dosage: medicine.dosage,
-                            time: medicine.time,
-                        },
-                    })
+                    />
+
+
+                    <Text
+
+                        style={styles.time}
+
+                    >
+
+                        {medicine.time}
+
+                    </Text>
+
+
+                </View>
+
+
+
+
+
+
+
+
+                {
+                    medicine.taken ?
+
+
+                        <View style={styles.completed}>
+
+
+                            <Text style={styles.completedText}>
+
+                                ✅ Taken
+
+                            </Text>
+
+
+                        </View>
+
+
+
+                        :
+
+
+
+                        <TouchableOpacity
+
+                            style={styles.takeButton}
+
+                            onPress={() => onTake(
+                                medicine.id
+                            )}
+
+                        >
+
+                            <Text style={styles.takeText}>
+
+                                Take Now
+
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
                 }
-            >
-                <Ionicons
-                    name="create-outline"
-                    size={24}
-                    color="#4F46E5"
-                />
-            </TouchableOpacity>
 
 
-            <TouchableOpacity
 
-                disabled={medicine.taken}
-
-                onPress={() => onTake(medicine.id)}
-
-            >
+            </View>
 
 
-                <Ionicons
 
-                    name={
-                        medicine.taken
-                            ?
-                            "checkmark-circle"
-                            :
-                            "time-outline"
-                    }
-
-                    size={28}
-
-                    color={
-                        medicine.taken
-                            ?
-                            "#10B981"
-                            :
-                            "#F59E0B"
-                    }
-
-                />
-
-
-            </TouchableOpacity>
 
 
         </View>
@@ -182,38 +264,233 @@ export default function MedicineItem({
 
 
 
+
+
+
+
+
 const styles = StyleSheet.create({
 
-    item: {
-        flexDirection: "row",
-        backgroundColor: "white",
-        padding: 18,
+
+
+    card: {
+
+
         marginHorizontal: 20,
-        borderRadius: 15,
-        marginBottom: 10,
-        alignItems: "center"
+
+        marginBottom: 15,
+
+        padding: 18,
+
+        borderRadius: 22,
+
+        elevation: 4
+
+
     },
+
+
+
+
+
+    row: {
+
+
+        flexDirection: "row",
+
+        alignItems: "center"
+
+
+    },
+
+
+
+
+
+    iconBox: {
+
+
+        width: 50,
+
+        height: 50,
+
+        borderRadius: 16,
+
+        backgroundColor: "#EEF2FF",
+
+        justifyContent: "center",
+
+        alignItems: "center"
+
+    },
+
+
 
 
     icon: {
-        width: 40,
-        height: 40,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 10,
-        marginRight: 15
+
+
+        fontSize: 26
+
     },
 
 
-    name: {
-        fontWeight: "bold",
-        fontSize: 16
-    },
+
 
 
     details: {
-        color: "#6B7280",
-        marginTop: 5
+
+
+        flex: 1,
+
+        marginLeft: 15
+
+
+    },
+
+
+
+
+    name: {
+
+
+        fontSize: 17,
+
+        fontWeight: "bold"
+
+
+    },
+
+
+
+
+
+    dosage: {
+
+
+        marginTop: 5,
+
+        fontSize: 14
+
+
+    },
+
+
+
+
+
+    bottom: {
+
+
+        flexDirection: "row",
+
+        justifyContent: "space-between",
+
+        alignItems: "center",
+
+        marginTop: 18
+
+
+    },
+
+
+
+
+    timeBox: {
+
+
+        flexDirection: "row",
+
+        alignItems: "center",
+
+        backgroundColor: "#EEF2FF",
+
+        paddingHorizontal: 12,
+
+        paddingVertical: 8,
+
+        borderRadius: 15
+
+
+    },
+
+
+
+
+    time: {
+
+
+        marginLeft: 5,
+
+        color: "#363546",
+
+        fontWeight: "600"
+
+
+    },
+
+
+
+
+
+    takeButton: {
+
+
+        backgroundColor: "#4F46E5",
+
+        paddingHorizontal: 18,
+
+        paddingVertical: 10,
+
+        borderRadius: 15
+
+
+    },
+
+
+
+
+
+    takeText: {
+
+
+        color: "#fff",
+
+        fontWeight: "bold"
+
+
+    },
+
+
+
+
+    completed: {
+
+
+        backgroundColor: "#DCFCE7",
+
+        paddingHorizontal: 15,
+
+        paddingVertical: 10,
+
+        borderRadius: 15
+
+
+    },
+
+
+
+
+    completedText: {
+
+
+        color: "#16A34A",
+
+        fontWeight: "bold"
+
+
     }
+
 
 
 });

@@ -1,4 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useState,
+    useContext
+} from "react";
+
 
 import {
     View,
@@ -9,75 +14,75 @@ import {
     TouchableOpacity
 } from "react-native";
 
-import { router } from "expo-router";
 
-import { auth } from "../firebase/firebaseConfig";
+import {
+    LinearGradient
+} from "expo-linear-gradient";
+
+
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+
+import {
+    router
+} from "expo-router";
+
+
+import {
+    ThemeContext
+} from "../context/ThemeContext";
+
+
+import {
+    auth
+} from "../firebase/firebaseConfig";
+
 
 import {
     getMedicines,
     deleteMedicine
 } from "../services/medicineService";
 
+
 import MedicineItem from "../components/MedicineItem";
+
+
+
+
 
 
 export default function Medicines() {
 
 
-    const [medicines, setMedicines] = useState<any[]>([]);
-
-    const [search, setSearch] = useState("");
-
-
-
-    useEffect(() => {
+    const {
+        colors
+    } = useContext(ThemeContext);
 
 
-        const loadMedicines = async () => {
+
+    const [medicines, setMedicines] =
+        useState<any[]>([]);
 
 
-            const user = auth.currentUser;
+    const [search, setSearch] =
+        useState("");
 
 
-            if (user) {
 
 
-                const data = await getMedicines(
-                    user.uid
-                );
 
 
-                setMedicines(data);
+
+    const loadMedicines = async () => {
 
 
-            }
-
-
-        };
-
-
-        loadMedicines();
-
-
-    }, []);
-
-
-    const handleDelete = async (id: string) => {
-
-
-        const user = auth.currentUser;
+        const user =
+            auth.currentUser;
 
 
         if (user) {
-
-
-            await deleteMedicine(
-
-                user.uid,
-
-                id
-
-            );
 
 
             const data =
@@ -95,8 +100,62 @@ export default function Medicines() {
     };
 
 
-    const filteredMedicines = medicines.filter(
-        (item) =>
+
+
+
+
+
+    useEffect(() => {
+
+
+        loadMedicines();
+
+
+    }, []);
+
+
+
+
+
+
+
+
+
+    const handleDelete = async (
+        id: string
+    ) => {
+
+
+        const user =
+            auth.currentUser;
+
+
+        if (user) {
+
+
+            await deleteMedicine(
+                user.uid,
+                id
+            );
+
+
+            loadMedicines();
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
+    const filteredMedicines =
+        medicines.filter(item =>
 
             item.name
                 .toLowerCase()
@@ -104,7 +163,10 @@ export default function Medicines() {
                     search.toLowerCase()
                 )
 
-    );
+        );
+
+
+
 
 
 
@@ -113,28 +175,139 @@ export default function Medicines() {
     return (
 
 
-        <View style={styles.container}>
+        <View
+
+            style={[
+                styles.container,
+                {
+                    backgroundColor:
+                        colors.background
+                }
+            ]}
+
+        >
 
 
-            <Text style={styles.title}>
-                My Medicines 💊
-            </Text>
 
 
 
 
 
-            <TextInput
+            <LinearGradient
 
-                placeholder="Search medicine..."
+                colors={[
+                    "#a1e7df",
+                    "#62c5c7"
+                ]}
 
-                value={search}
+                style={styles.header}
 
-                onChangeText={setSearch}
+            >
 
-                style={styles.search}
 
-            />
+
+                <Text style={styles.title}>
+
+                    My Medicines 💊
+
+                </Text>
+
+
+
+                <Text style={styles.subtitle}>
+
+                    Manage your daily reminders
+
+                </Text>
+
+
+
+
+
+                <View style={styles.countBox}>
+
+
+                    <Ionicons
+
+                        name="medical"
+
+                        size={25}
+
+                        color="white"
+
+                    />
+
+
+
+                    <Text style={styles.countText}>
+
+                        {medicines.length}
+                        {" "}
+                        Medicines
+
+                    </Text>
+
+
+                </View>
+
+
+
+            </LinearGradient>
+
+
+
+
+
+
+
+
+
+            <View
+
+                style={[
+                    styles.searchBox,
+                    {
+                        backgroundColor:
+                            colors.card
+                    }
+                ]}
+
+            >
+
+
+                <Ionicons
+
+                    name="search"
+
+                    size={22}
+
+                    color="#9CA3AF"
+
+                />
+
+
+
+                <TextInput
+
+                    placeholder="Search medicine..."
+
+                    placeholderTextColor="#9CA3AF"
+
+                    value={search}
+
+                    onChangeText={setSearch}
+
+                    style={styles.search}
+
+
+                />
+
+
+
+            </View>
+
+
+
 
 
 
@@ -142,7 +315,7 @@ export default function Medicines() {
 
 
             {
-                filteredMedicines.length === 0 ? (
+                filteredMedicines.length === 0 ?
 
 
                     <View style={styles.empty}>
@@ -153,23 +326,44 @@ export default function Medicines() {
                         </Text>
 
 
+                        <Text
 
-                        <Text style={styles.emptyTitle}>
+                            style={[
+                                styles.emptyTitle,
+                                {
+                                    color:
+                                        colors.text
+                                }
+                            ]}
+
+                        >
+
                             No Medicines Found
+
                         </Text>
 
 
 
-                        <Text style={styles.emptyText}>
+                        <Text
+
+                            style={{
+                                color:
+                                    colors.subText
+                            }}
+
+                        >
+
                             Add your first medicine reminder
+
                         </Text>
+
 
 
                     </View>
 
 
 
-                ) : (
+                    :
 
 
 
@@ -179,8 +373,8 @@ export default function Medicines() {
                         data={filteredMedicines}
 
 
-                        keyExtractor={(item) =>
-                            item.id
+                        keyExtractor={
+                            item => item.id
                         }
 
 
@@ -201,7 +395,9 @@ export default function Medicines() {
                                 onTake={() => { }}
 
 
-                                onDelete={handleDelete}
+                                onDelete={
+                                    handleDelete
+                                }
 
 
                             />
@@ -212,9 +408,6 @@ export default function Medicines() {
 
                     />
 
-
-                )
-
             }
 
 
@@ -222,7 +415,7 @@ export default function Medicines() {
 
 
 
-            {/* Add Medicine Button */}
+
 
 
             <TouchableOpacity
@@ -230,17 +423,29 @@ export default function Medicines() {
                 style={styles.floatingButton}
 
                 onPress={() =>
-                    router.push("/add-medicine")
+                    router.push(
+                        "/add-medicine"
+                    )
                 }
 
             >
 
-                <Text style={styles.plus}>
-                    +
-                </Text>
+
+                <Ionicons
+
+                    name="add"
+
+                    size={35}
+
+                    color="white"
+
+                />
 
 
             </TouchableOpacity>
+
+
+
 
 
 
@@ -249,7 +454,12 @@ export default function Medicines() {
 
     );
 
+
 }
+
+
+
+
 
 
 
@@ -258,45 +468,132 @@ export default function Medicines() {
 const styles = StyleSheet.create({
 
 
+
     container: {
 
-        flex: 1,
-
-        backgroundColor: "#F9FAFB",
-
-        padding: 20
+        flex: 1
 
     },
+
+
+
+
+
+    header: {
+
+
+        padding: 25,
+
+        paddingTop: 45,
+
+        borderBottomLeftRadius: 35,
+
+        borderBottomRightRadius: 35
+
+    },
+
+
 
 
 
     title: {
 
+
+        color: "#080808",
+
         fontSize: 28,
 
-        fontWeight: "bold",
+        fontWeight: "bold"
 
-        marginTop: 30,
-
-        marginBottom: 20
 
     },
 
 
 
-    search: {
 
-        backgroundColor: "#fff",
+    subtitle: {
+
+
+        color: "#0a0a0a",
+
+        marginTop: 5
+
+    },
+
+
+
+
+    countBox: {
+
+
+        marginTop: 20,
+
+        backgroundColor: "rgba(255,255,255,0.2)",
 
         padding: 15,
 
-        borderRadius: 15,
+        borderRadius: 18,
 
-        marginBottom: 20,
+        flexDirection: "row",
 
-        borderWidth: 1,
+        alignItems: "center"
 
-        borderColor: "#E5E7EB"
+
+    },
+
+
+
+
+
+    countText: {
+
+
+        color: "#06282c",
+
+        marginLeft: 10,
+
+        fontSize: 16,
+
+        fontWeight: "bold"
+
+
+    },
+
+
+
+
+
+    searchBox: {
+
+
+        margin: 20,
+
+        borderRadius: 18,
+
+        paddingHorizontal: 15,
+
+        flexDirection: "row",
+
+        alignItems: "center",
+
+        elevation: 3
+
+
+    },
+
+
+
+
+
+    search: {
+
+
+        flex: 1,
+
+        padding: 15,
+
+        fontSize: 15
+
 
     },
 
@@ -306,25 +603,32 @@ const styles = StyleSheet.create({
 
     empty: {
 
+
         flex: 1,
 
         justifyContent: "center",
 
         alignItems: "center"
 
+
     },
+
 
 
 
     emptyIcon: {
 
-        fontSize: 60
+
+        fontSize: 70
+
 
     },
 
 
 
+
     emptyTitle: {
+
 
         fontSize: 20,
 
@@ -332,15 +636,6 @@ const styles = StyleSheet.create({
 
         marginTop: 15
 
-    },
-
-
-
-    emptyText: {
-
-        color: "#6B7280",
-
-        marginTop: 5
 
     },
 
@@ -350,41 +645,30 @@ const styles = StyleSheet.create({
 
     floatingButton: {
 
+
         position: "absolute",
 
         right: 25,
 
         bottom: 30,
 
-        width: 60,
+        width: 65,
 
-        height: 60,
+        height: 65,
 
-        borderRadius: 30,
+        borderRadius: 35,
 
-        backgroundColor: "#4F46E5",
+        backgroundColor: "#1e8fa3",
 
         justifyContent: "center",
 
         alignItems: "center",
 
-        elevation: 5
+        elevation: 8
 
-    },
-
-
-
-    plus: {
-
-        color: "white",
-
-        fontSize: 35,
-
-        fontWeight: "bold",
-
-        marginTop: -5
 
     }
+
 
 
 });

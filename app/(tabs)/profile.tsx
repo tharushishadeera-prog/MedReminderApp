@@ -9,6 +9,7 @@ import {
 
 import {
     SafeAreaView,
+    Alert,
     ScrollView,
     View,
     Text,
@@ -94,7 +95,12 @@ export default function Profile() {
                     <ProfileMenuItem
                         icon="star-outline"
                         title="Rate App"
-                        onPress={() => { }}
+                        onPress={() =>
+                            Alert.alert(
+                                "Rate MedReminder ⭐",
+                                "Thank you for using our app!"
+                            )
+                        }
                     />
 
                     <ProfileMenuItem
