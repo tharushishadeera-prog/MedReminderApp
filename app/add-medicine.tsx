@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
+
 import {
+
     View,
     Text,
     TextInput,
@@ -8,73 +10,126 @@ import {
     StyleSheet,
     Alert,
     Switch
+
 } from "react-native";
 
-import DateTimePicker from "@react-native-community/datetimepicker";
+
+
+import DateTimePicker from
+    "@react-native-community/datetimepicker";
+
+
 
 import { router } from "expo-router";
 
-import {
-    auth,
-    db
-} from "./firebase/firebaseConfig";
+
 
 import {
+
+    auth,
+    db
+
+} from "./firebase/firebaseConfig";
+
+
+
+import {
+
     collection,
     addDoc,
     serverTimestamp
+
 } from "firebase/firestore";
+
+
+
+import {
+
+    scheduleMedicineReminder,
+    requestNotificationPermission
+
+} from "./services/notificationService";
+
+
+
+
+
 
 
 export default function AddMedicine() {
 
 
+
     const [name, setName] = useState("");
+
     const [dosage, setDosage] = useState("");
+
     const [time, setTime] = useState("");
 
     const [showPicker, setShowPicker] = useState(false);
 
     const [reminder, setReminder] = useState(true);
 
-    const [selectedTime, setSelectedTime] = useState(new Date());
+
+    const [selectedTime, setSelectedTime]
+        =
+        useState(new Date());
 
 
 
 
-    const onTimeChange = (event: any, date?: Date) => {
-
-
-        setShowPicker(false);
-
-
-        if (date) {
-
-            setSelectedTime(date);
-
-
-            let hours = date.getHours();
-
-            let minutes = date.getMinutes();
-
-
-            const period =
-                hours >= 12 ? "PM" : "AM";
-
-
-            hours = hours % 12 || 12;
 
 
 
-            setTime(
-                `${hours}:${minutes.toString().padStart(2, "0")} ${period}`
-            );
+    const onTimeChange =
+        (event: any, date?: Date) => {
 
 
-        }
+            setShowPicker(false);
 
 
-    };
+
+            if (date) {
+
+
+                setSelectedTime(date);
+
+
+
+                let hours =
+                    date.getHours();
+
+
+
+                let minutes =
+                    date.getMinutes();
+
+
+
+                const period =
+                    hours >= 12 ? "PM" : "AM";
+
+
+
+                hours =
+                    hours % 12 || 12;
+
+
+
+
+                setTime(
+
+                    `${hours}:${minutes
+                        .toString()
+                        .padStart(2, "0")} ${period}`
+
+                );
+
+            }
+
+        };
+
+
 
 
 
@@ -88,20 +143,26 @@ export default function AddMedicine() {
         try {
 
 
-            const user = auth.currentUser;
+            const user =
+                auth.currentUser;
 
 
 
             if (!user) {
+
 
                 Alert.alert(
                     "Error",
                     "User not logged"
                 );
 
+
                 return;
 
             }
+
+
+
 
 
 
@@ -113,48 +174,94 @@ export default function AddMedicine() {
                     "Fill all fields"
                 );
 
+
                 return;
+
 
             }
 
 
 
 
-            // Create medicine
 
 
-            const medicineRef = await addDoc(
 
-                collection(
-                    db,
-                    "users",
-                    user.uid,
-                    "medicines"
-                ),
+            // Notification Permission
 
-                {
+            if (reminder) {
 
-                    name,
 
-                    dosage,
+                const allowed =
+                    await requestNotificationPermission();
 
-                    time,
 
-                    reminder,
 
-                    taken: false,
+                if (!allowed) {
 
-                    createdAt: serverTimestamp()
+
+                    Alert.alert(
+                        "Permission Required",
+                        "Enable notification permission"
+                    );
+
+
+                    return;
+
 
                 }
 
-            );
+
+            }
 
 
 
 
 
-            // Create first history record
+
+
+            // Save Medicine
+
+
+            const medicineRef =
+                await addDoc(
+
+                    collection(
+                        db,
+                        "users",
+                        user.uid,
+                        "medicines"
+                    ),
+
+                    {
+
+
+                        name,
+
+                        dosage,
+
+                        time,
+
+                        reminder,
+
+                        taken: false,
+
+                        createdAt:
+                            serverTimestamp()
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+
+
+            // History
 
 
             await addDoc(
@@ -182,7 +289,8 @@ export default function AddMedicine() {
 
                     date: new Date(),
 
-                    createdAt: serverTimestamp()
+                    createdAt:
+                        serverTimestamp()
 
 
                 }
@@ -193,9 +301,41 @@ export default function AddMedicine() {
 
 
 
+
+
+
+
+            // Schedule Notification
+
+
+            await scheduleMedicineReminder({
+
+                id:
+                    medicineRef.id,
+
+                name,
+
+                dosage,
+
+                time,
+
+                reminder
+
+
+            });
+
+
+
+
+
+
+
             Alert.alert(
+
                 "Success",
+
                 "Medicine Added"
+
             );
 
 
@@ -205,13 +345,19 @@ export default function AddMedicine() {
 
 
         }
+
         catch (error: any) {
 
 
+
             Alert.alert(
+
                 "Error",
+
                 error.message
+
             );
+
 
 
         }
@@ -226,14 +372,21 @@ export default function AddMedicine() {
 
 
 
+
+
     return (
+
 
         <View style={styles.container}>
 
 
             <Text style={styles.title}>
+
                 Add Medicine 💊
+
             </Text>
+
+
 
 
 
@@ -248,6 +401,8 @@ export default function AddMedicine() {
                 onChangeText={setName}
 
             />
+
+
 
 
 
@@ -268,6 +423,8 @@ export default function AddMedicine() {
 
 
 
+
+
             <TouchableOpacity
 
                 style={styles.input}
@@ -276,11 +433,20 @@ export default function AddMedicine() {
 
             >
 
+
                 <Text>
 
+
                     {
-                        time ? time : "Select Time ⏰"
+
+                        time ?
+
+                            time :
+
+                            "Select Time ⏰"
+
                     }
+
 
                 </Text>
 
@@ -291,22 +457,35 @@ export default function AddMedicine() {
 
 
 
+
+
             {
+
                 showPicker &&
+
 
                 <DateTimePicker
 
+
                     value={selectedTime}
+
 
                     mode="time"
 
+
                     is24Hour={false}
+
 
                     onChange={onTimeChange}
 
+
                 />
 
+
             }
+
+
+
 
 
 
@@ -315,8 +494,12 @@ export default function AddMedicine() {
 
 
                 <Text>
+
                     Enable Reminder 🔔
+
                 </Text>
+
+
 
 
                 <Switch
@@ -334,17 +517,24 @@ export default function AddMedicine() {
 
 
 
+
+
+
+
             <TouchableOpacity
 
                 style={styles.button}
 
                 onPress={saveMedicine}
 
+
             >
 
 
                 <Text style={styles.buttonText}>
+
                     Save Medicine
+
                 </Text>
 
 
@@ -352,9 +542,15 @@ export default function AddMedicine() {
 
 
 
+
+
+
+
         </View>
 
+
     );
+
 
 
 }
@@ -364,79 +560,115 @@ export default function AddMedicine() {
 
 
 
-const styles = StyleSheet.create({
 
 
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        padding: 25,
-        justifyContent: "center"
-    },
+
+const styles =
+    StyleSheet.create({
 
 
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginBottom: 30
-    },
+
+        container: {
 
 
-    input: {
+            flex: 1,
 
-        backgroundColor: "#fff",
+            backgroundColor: "#F9FAFB",
 
-        padding: 15,
+            padding: 25,
 
-        borderRadius: 12,
-
-        marginBottom: 15,
-
-        borderWidth: 1,
-
-        borderColor: "#ddd"
-
-    },
+            justifyContent: "center"
 
 
-    reminderRow: {
-
-        backgroundColor: "#fff",
-
-        padding: 15,
-
-        borderRadius: 12,
-
-        flexDirection: "row",
-
-        justifyContent: "space-between",
-
-        marginBottom: 20
-
-    },
+        },
 
 
-    button: {
 
-        backgroundColor: "#4F46E5",
-
-        padding: 15,
-
-        borderRadius: 12,
-
-        alignItems: "center"
-
-    },
+        title: {
 
 
-    buttonText: {
+            fontSize: 28,
 
-        color: "#fff",
+            fontWeight: "bold",
 
-        fontWeight: "bold"
+            textAlign: "center",
 
-    }
+            marginBottom: 30
 
 
-});
+        },
+
+
+
+
+        input: {
+
+
+            backgroundColor: "#fff",
+
+            padding: 15,
+
+            borderRadius: 12,
+
+            marginBottom: 15,
+
+            borderWidth: 1,
+
+            borderColor: "#ddd"
+
+
+        },
+
+
+
+
+        reminderRow: {
+
+
+            backgroundColor: "#fff",
+
+            padding: 15,
+
+            borderRadius: 12,
+
+            flexDirection: "row",
+
+            justifyContent: "space-between",
+
+            marginBottom: 20
+
+
+        },
+
+
+
+
+        button: {
+
+
+            backgroundColor: "#4F46E5",
+
+            padding: 15,
+
+            borderRadius: 12,
+
+            alignItems: "center"
+
+
+        },
+
+
+
+
+        buttonText: {
+
+
+            color: "#fff",
+
+            fontWeight: "bold"
+
+
+        }
+
+
+    });

@@ -1,49 +1,17 @@
-import * as Notifications from "expo-notifications";
-
-
-// Notification display settings
-
-Notifications.setNotificationHandler({
-
-    handleNotification: async () => ({
-
-        shouldShowBanner: true,
-
-        shouldShowList: true,
-
-        shouldPlaySound: true,
-
-        shouldSetBadge: false,
-
-    }),
-
-});
+let Notifications: any;
 
 
 
+const getNotifications = async () => {
 
-// Request permission
+    if (!Notifications) {
 
-export const requestNotificationPermission = async () => {
-
-
-    const { status } =
-        await Notifications.requestPermissionsAsync();
-
-
-
-    if (status !== "granted") {
-
-        console.log(
-            "Notification permission denied"
-        );
-
-        return false;
+        Notifications =
+            await import("expo-notifications");
 
     }
 
-
-    return true;
+    return Notifications;
 
 };
 
@@ -51,12 +19,58 @@ export const requestNotificationPermission = async () => {
 
 
 
-// Schedule medicine reminder
+export const requestNotificationPermission = async () => {
+
+
+    const Notifications =
+        await getNotifications();
+
+
+
+    const permission =
+        await Notifications.requestPermissionsAsync();
+
+
+
+    if (permission.status !== "granted") {
+
+        return false;
+
+    }
+
+
+
+    // Android Channel
+
+    await Notifications.setNotificationChannelAsync(
+        "medicine",
+        {
+
+            name: "Medicine Reminder",
+
+            importance:
+                Notifications.AndroidImportance.HIGH,
+
+            sound: "default",
+
+        }
+    );
+
+
+
+    return true;
+
+
+};
+
+
+
+
+
+
 
 export const scheduleMedicineReminder = async (
-
     medicine: any
-
 ) => {
 
 
@@ -68,63 +82,52 @@ export const scheduleMedicineReminder = async (
 
 
 
-    const [time, period] =
-        medicine.time.split(" ");
-
-
-
-    let [
-        hour,
-        minute
-    ] =
-        time.split(":")
-            .map(Number);
-
-
-
-    if (period === "PM" && hour !== 12) {
-
-        hour += 12;
-
-    }
-
-
-    if (period === "AM" && hour === 12) {
-
-        hour = 0;
-
-    }
+    const Notifications =
+        await getNotifications();
 
 
 
 
     await Notifications.scheduleNotificationAsync({
 
+
         content: {
 
+            title:
+                "💊 Medicine Reminder",
 
-            title: "💊 Medicine Reminder",
 
             body:
                 `Time to take ${medicine.name} (${medicine.dosage})`,
 
 
-            sound: true,
+            sound:
+                "default",
+
+
+            data: {
+
+                medicineId:
+                    medicine.id
+
+            }
+
 
         },
+
 
 
         trigger: {
 
 
-            hour: hour,
-
-            minute: minute,
-
-            repeats: true,
+            seconds: 10,
 
 
-        } as any
+            channelId:
+                "medicine"
+
+
+        }
 
 
     });
