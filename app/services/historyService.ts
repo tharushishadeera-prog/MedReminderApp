@@ -8,128 +8,157 @@ import { db } from "../firebase/firebaseConfig";
 
 
 
-// Get all medicine history
+
+// ===============================
+// GET MEDICINE HISTORY
+// ===============================
 
 export const getMedicineHistory = async (
     uid: string
 ) => {
 
 
-    let history: any[] = [];
+    try {
+
+
+        const history: any[] = [];
 
 
 
-    const medicinesRef =
-        collection(
-            db,
-            "users",
-            uid,
-            "medicines"
-        );
-
-
-
-    const medicines =
-        await getDocs(medicinesRef);
-
-
-
-
-
-    for (
-        const medicine of medicines.docs
-    ) {
-
-
-
-        const medicineData =
-            medicine.data();
-
-
-
-
-        const historyRef =
+        const medicinesRef =
             collection(
                 db,
                 "users",
                 uid,
-                "medicines",
-                medicine.id,
-                "history"
+                "medicines"
             );
 
 
 
-
-
-        const historySnap =
-            await getDocs(historyRef);
-
+        const medicinesSnapshot =
+            await getDocs(medicinesRef);
 
 
 
 
 
-        historySnap.forEach((item) => {
-
-
-            const data: any =
-                item.data();
-
+        for (
+            const medicineDoc of medicinesSnapshot.docs
+        ) {
 
 
 
-            history.push({
-
-
-                id: item.id,
-
-
-                medicineId:
-                    medicine.id,
+            const medicineData =
+                medicineDoc.data();
 
 
 
-                medicineName:
-                    medicineData.name,
+
+            const historyRef =
+                collection(
+                    db,
+                    "users",
+                    uid,
+                    "medicines",
+                    medicineDoc.id,
+                    "history"
+                );
 
 
 
-                status:
-                    data.status ||
-                    (
-                        data.taken
-                            ?
-                            "Taken"
-                            :
-                            "Missed"
-                    ),
+
+
+            const historySnapshot =
+                await getDocs(historyRef);
 
 
 
-                date:
-                    data.date ||
-                    data.createdAt
-                    ||
-                    new Date()
 
 
 
-            });
+
+            historySnapshot.forEach(
+                (historyDoc) => {
+
+
+                    const data =
+                        historyDoc.data();
 
 
 
-        });
+
+
+                    history.push({
+
+                        id:
+                            historyDoc.id,
+
+
+                        medicineId:
+                            medicineDoc.id,
+
+
+
+                        medicineName:
+                            medicineData.name,
+
+
+
+                        dosage:
+                            medicineData.dosage,
+
+
+
+                        time:
+                            medicineData.time,
+
+
+
+                        status:
+                            data.status || "Pending",
+
+
+
+                        date:
+                            data.date ||
+                            data.createdAt ||
+                            new Date()
+
+
+                    });
+
+
+
+                }
+
+            );
+
+
+
+        }
+
+
+
+
+        return history;
 
 
 
     }
 
+    catch (error) {
 
 
+        console.log(
+            "History Fetch Error:",
+            error
+        );
 
-    return history;
 
+        return [];
+
+
+    }
 
 
 };
@@ -142,16 +171,20 @@ export const getMedicineHistory = async (
 
 
 
-// Calculate weekly adherence
+
+
+// ===============================
+// WEEKLY ADHERENCE
+// ===============================
 
 export const getWeeklyAdherence = async (
     uid: string
 ) => {
 
 
-
     const history =
         await getMedicineHistory(uid);
+
 
 
 
@@ -172,24 +205,7 @@ export const getWeeklyAdherence = async (
 
 
 
-    const weekly: any = {
-
-        Sun: 0,
-        Mon: 0,
-        Tue: 0,
-        Wed: 0,
-        Thu: 0,
-        Fri: 0,
-        Sat: 0
-
-    };
-
-
-
-
-
-    const totals: any = {
-
+    const completed: any = {
 
         Sun: 0,
         Mon: 0,
@@ -206,72 +222,89 @@ export const getWeeklyAdherence = async (
 
 
 
+    const total: any = {
 
-    history.forEach((item) => {
+        Sun: 0,
+        Mon: 0,
+        Tue: 0,
+        Wed: 0,
+        Thu: 0,
+        Fri: 0,
+        Sat: 0
+
+    };
 
 
 
-        let date;
 
 
 
-        if (
-            item.date?.toDate
-        ) {
 
-            date =
-                item.date.toDate();
+    history.forEach(
+        (item) => {
+
+
+            let date;
+
+
+
+            if (
+                item.date?.toDate
+            ) {
+
+                date =
+                    item.date.toDate();
+
+            }
+
+
+            else {
+
+
+                date =
+                    new Date(item.date);
+
+
+            }
+
+
+
+
+
+            const day =
+                days[
+                date.getDay()
+                ];
+
+
+
+
+            total[day]++;
+
+
+
+
+
+
+            if (
+
+                item.status === "Taken"
+
+                ||
+
+                item.status === "Completed"
+
+            ) {
+
+                completed[day]++;
+
+            }
+
+
 
         }
 
-        else if (
-            item.date
-        ) {
-
-            date =
-                new Date(item.date);
-
-        }
-
-        else {
-
-            return;
-
-        }
-
-
-
-
-
-
-        const day =
-            days[
-            date.getDay()
-            ];
-
-
-
-
-        totals[day]++;
-
-
-
-
-        if (
-            item.status === "Taken"
-            ||
-            item.status === "Completed"
-        ) {
-
-            weekly[day]++;
-
-        }
-
-
-
-
-
-    });
+    );
 
 
 
@@ -279,36 +312,36 @@ export const getWeeklyAdherence = async (
 
 
 
-    const chartData = days.map((day) => {
+    const values =
+        days.map(
+            (day) => {
+
+
+                if (total[day] === 0) {
+
+                    return 0;
+
+                }
 
 
 
-        if (
-            totals[day] === 0
-        ) {
+                return Math.round(
 
-            return 0;
+                    (
+                        completed[day]
+                        /
+                        total[day]
 
-        }
+                    )
+                    *
+                    100
+
+                );
 
 
-
-        return Math.round(
-
-            (
-                weekly[day]
-                /
-                totals[day]
-            )
-            *
-            100
+            }
 
         );
-
-
-
-    });
-
 
 
 
@@ -318,24 +351,14 @@ export const getWeeklyAdherence = async (
     return {
 
 
-        labels: [
-
-            "Sun",
-            "Mon",
-            "Tue",
-            "Wed",
-            "Thu",
-            "Fri",
-            "Sat"
-
-        ],
+        labels: days,
 
 
         datasets: [
 
             {
 
-                data: chartData
+                data: values
 
             }
 
@@ -343,7 +366,6 @@ export const getWeeklyAdherence = async (
 
 
     };
-
 
 
 };
@@ -356,7 +378,12 @@ export const getWeeklyAdherence = async (
 
 
 
-// Get missed medicines
+
+
+
+// ===============================
+// MISSED MEDICINES
+// ===============================
 
 export const getMissedMedicines = async (
     uid: string
@@ -373,6 +400,78 @@ export const getMissedMedicines = async (
 
         item =>
             item.status === "Missed"
+
+    );
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// TODAY MEDICINES
+// ===============================
+
+export const getTodayMedicines = async (
+    uid: string
+) => {
+
+
+    const history =
+        await getMedicineHistory(uid);
+
+
+
+
+    const today =
+        new Date();
+
+
+
+    return history.filter(
+        item => {
+
+
+            const date =
+                item.date?.toDate
+                    ?
+                    item.date.toDate()
+                    :
+                    new Date(item.date);
+
+
+
+
+            return (
+
+                date.getDate()
+                ===
+                today.getDate()
+
+                &&
+
+                date.getMonth()
+                ===
+                today.getMonth()
+
+                &&
+
+                date.getFullYear()
+                ===
+                today.getFullYear()
+
+            );
+
+
+        }
 
     );
 

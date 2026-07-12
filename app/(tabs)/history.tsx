@@ -13,7 +13,14 @@ import {
 } from "react-native";
 
 
-import { auth } from "../firebase/firebaseConfig";
+import {
+    LinearGradient
+} from "expo-linear-gradient";
+
+
+import {
+    auth
+} from "../firebase/firebaseConfig";
 
 
 import {
@@ -30,6 +37,8 @@ import {
 import {
     ThemeContext
 } from "../context/ThemeContext";
+
+
 
 
 
@@ -58,6 +67,7 @@ export default function History() {
 
 
 
+
     useEffect(() => {
 
         loadHistory();
@@ -81,25 +91,23 @@ export default function History() {
         if (user) {
 
 
-
-            const historyData =
+            const data =
                 await getMedicineHistory(
                     user.uid
                 );
 
 
-            setHistory(historyData);
+            setHistory(data);
 
 
 
-
-            const chartData =
+            const chart =
                 await getWeeklyAdherence(
                     user.uid
                 );
 
 
-            setWeeklyData(chartData);
+            setWeeklyData(chart);
 
 
 
@@ -142,10 +150,7 @@ export default function History() {
         history.length > 0
             ?
             Math.round(
-                (
-                    completed /
-                    history.length
-                ) * 100
+                completed / history.length * 100
             )
             :
             0;
@@ -157,11 +162,12 @@ export default function History() {
 
 
 
-
     return (
 
 
+
         <ScrollView
+
 
             style={[
                 styles.container,
@@ -172,26 +178,78 @@ export default function History() {
             ]}
 
 
+
+            showsVerticalScrollIndicator={false}
+
+
+
         >
 
 
 
 
-            <Text
 
-                style={[
-                    styles.title,
-                    {
-                        color:
-                            colors.text
-                    }
+
+
+            <LinearGradient
+
+
+                colors={[
+                    "#a1e7df",
+                    "#62c5c7"
                 ]}
+
+
+                style={styles.header}
+
+
 
             >
 
-                Medicine Analytics 📈
 
-            </Text>
+                <Text style={styles.title}>
+
+                    Medicine Analytics 📈
+
+                </Text>
+
+
+
+                <Text style={styles.subtitle}>
+
+                    Track your medicine progress
+
+                </Text>
+
+
+
+
+
+                <View style={styles.adherence}>
+
+
+                    <Text style={styles.adherenceText}>
+
+                        Weekly Adherence
+
+                    </Text>
+
+
+
+                    <Text style={styles.percent}>
+
+                        {percentage}%
+
+                    </Text>
+
+
+
+                </View>
+
+
+
+            </LinearGradient>
+
 
 
 
@@ -204,55 +262,48 @@ export default function History() {
 
 
                 <Card
+
+                    icon="💊"
+
                     number={history.length}
+
                     title="Total"
+
                     colors={colors}
+
                 />
 
+
+
                 <Card
+
+                    icon="✅"
+
                     number={completed}
+
                     title="Completed"
+
                     colors={colors}
+
                 />
+
 
 
                 <Card
+
+                    icon="❌"
+
                     number={missed}
+
                     title="Missed"
+
                     colors={colors}
+
                 />
 
 
 
             </View>
-
-
-
-
-
-
-
-
-            <View style={styles.progressCard}>
-
-
-                <Text style={styles.progressTitle}>
-
-                    Weekly Adherence
-
-                </Text>
-
-
-
-                <Text style={styles.percent}>
-
-                    {percentage}%
-
-                </Text>
-
-
-            </View>
-
 
 
 
@@ -267,8 +318,7 @@ export default function History() {
                 style={[
                     styles.section,
                     {
-                        color:
-                            colors.text
+                        color: colors.text
                     }
                 ]}
 
@@ -286,72 +336,98 @@ export default function History() {
 
 
 
-            {
-                weeklyData &&
+            <View
+
+                style={[
+                    styles.chartCard,
+                    {
+                        backgroundColor:
+                            colors.card
+                    }
+                ]}
+
+            >
 
 
-                <BarChart
+                {
+                    weeklyData ?
 
 
-                    data={weeklyData}
+                        <BarChart
 
 
-
-                    width={330}
-
-
-                    height={220}
+                            data={weeklyData}
 
 
-
-                    yAxisSuffix="%"
-
+                            width={320}
 
 
-                    fromZero={true}
+                            height={220}
 
 
-
-                    chartConfig={{
-
-                        backgroundGradientFrom:
-                            colors.card,
+                            fromZero={true}
 
 
-                        backgroundGradientTo:
-                            colors.card,
-
-
-                        decimalPlaces: 0,
-
-
-                        color:
-                            (opacity = 1) =>
-                                `rgba(79,70,229,${opacity})`,
-
-
-                        labelColor:
-                            () =>
-                                colors.text
-
-
-                    }}
+                            yAxisSuffix="%"
 
 
 
-                    style={{
+                            chartConfig={{
 
-                        borderRadius: 16
-
-                    }}
-
+                                backgroundGradientFrom:
+                                    colors.card,
 
 
-                />
+                                backgroundGradientTo:
+                                    colors.card,
 
-            }
+
+                                decimalPlaces: 0,
 
 
+                                color:
+                                    (opacity = 1) =>
+                                        `rgba(79,70,229,${opacity})`,
+
+
+                                labelColor: () => colors.text
+
+
+                            }}
+
+
+                            style={{
+                                borderRadius: 20
+                            }}
+
+
+
+                        />
+
+
+
+                        :
+
+                        <Text
+
+                            style={{
+                                color: colors.text,
+                                textAlign: "center"
+                            }}
+
+                        >
+
+                            Loading chart...
+
+                        </Text>
+
+
+
+                }
+
+
+
+            </View>
 
 
 
@@ -366,8 +442,7 @@ export default function History() {
                 style={[
                     styles.section,
                     {
-                        color:
-                            colors.text
+                        color: colors.text
                     }
                 ]}
 
@@ -384,31 +459,55 @@ export default function History() {
 
 
 
-
             {
-                history.length === 0
 
-                    ?
+                history.length === 0 ?
 
-                    <Text
-                        style={{
-                            color:
-                                colors.text
-                        }}
+
+                    <View
+
+                        style={[
+                            styles.empty,
+                            {
+                                backgroundColor:
+                                    colors.card
+                            }
+                        ]}
+
                     >
 
-                        No history available 💊
 
-                    </Text>
+                        <Text style={{ fontSize: 50 }}>
+                            💊
+                        </Text>
+
+
+                        <Text
+
+                            style={{
+                                color: colors.text
+                            }}
+
+                        >
+
+                            No history available
+
+                        </Text>
+
+
+                    </View>
+
 
 
                     :
+
 
 
                     history.map(item => (
 
 
                         <View
+
 
                             key={item.id}
 
@@ -422,25 +521,45 @@ export default function History() {
                             ]}
 
 
+
                         >
 
 
+                            <View>
 
-                            <Text
 
-                                style={[
-                                    styles.name,
-                                    {
-                                        color:
-                                            colors.text
-                                    }
-                                ]}
+                                <Text
 
-                            >
+                                    style={[
+                                        styles.name,
+                                        {
+                                            color: colors.text
+                                        }
+                                    ]}
 
-                                💊 {item.medicineName}
+                                >
 
-                            </Text>
+                                    💊 {item.medicineName}
+
+                                </Text>
+
+
+
+                                <Text
+
+                                    style={{
+                                        color: colors.subText
+                                    }}
+
+                                >
+
+                                    Medicine Taken Record
+
+                                </Text>
+
+
+                            </View>
+
 
 
 
@@ -453,10 +572,14 @@ export default function History() {
                                             ?
                                             "#EF4444"
                                             :
-                                            "#10B981"
+                                            "#10B981",
+
+                                    fontWeight: "bold"
+
                                 }}
 
                             >
+
 
                                 {
                                     item.status === "Missed"
@@ -474,6 +597,7 @@ export default function History() {
                         </View>
 
 
+
                     ))
 
 
@@ -484,7 +608,9 @@ export default function History() {
 
 
 
+
         </ScrollView>
+
 
 
     );
@@ -500,7 +626,9 @@ export default function History() {
 
 
 
+
 function Card({
+    icon,
     number,
     title,
     colors
@@ -508,6 +636,7 @@ function Card({
 
 
     return (
+
 
         <View
 
@@ -521,6 +650,14 @@ function Card({
 
         >
 
+
+            <Text style={styles.icon}>
+
+                {icon}
+
+            </Text>
+
+
             <Text style={styles.number}>
 
                 {number}
@@ -529,10 +666,11 @@ function Card({
 
 
             <Text
+
                 style={{
-                    color:
-                        colors.text
+                    color: colors.text
                 }}
+
             >
 
                 {title}
@@ -541,6 +679,7 @@ function Card({
 
 
         </View>
+
 
 
     );
@@ -556,58 +695,156 @@ function Card({
 
 
 
+
 const styles = StyleSheet.create({
 
 
+
     container: {
-
         flex: 1,
+        paddingBottom: 30
+    },
 
-        padding: 20
+
+
+    header: {
+
+
+        padding: 25,
+
+        paddingTop: 45,
+
+        borderBottomLeftRadius: 35,
+
+        borderBottomRightRadius: 35
+
 
     },
+
+
 
 
 
     title: {
 
+
+        color: "#0c0c0c",
+
         fontSize: 28,
 
-        fontWeight: "bold",
+        fontWeight: "bold"
 
-        marginTop: 30,
-
-        marginBottom: 25
 
     },
+
+
+
+    subtitle: {
+
+
+        color: "#101111",
+
+        marginTop: 5
+
+
+    },
+
+
+
+
+    adherence: {
+
+
+        marginTop: 25,
+
+        backgroundColor: "rgba(255,255,255,0.2)",
+
+        padding: 20,
+
+        borderRadius: 25
+
+
+    },
+
+
+
+
+    adherenceText: {
+
+
+        color: "#0a0a0a",
+
+        fontSize: 16
+
+
+    },
+
+
+
+
+    percent: {
+
+
+        color: "#0c0c0c",
+
+        fontSize: 42,
+
+        fontWeight: "bold"
+
+
+    },
+
+
+
 
 
 
     cards: {
 
+
         flexDirection: "row",
 
-        justifyContent: "space-between"
+        justifyContent: "space-around",
+
+        marginVertical: 20
+
 
     },
+
+
 
 
 
     card: {
 
-        width: "31%",
+
+        width: "30%",
 
         padding: 15,
 
-        borderRadius: 16,
+        borderRadius: 20,
 
-        alignItems: "center"
+        alignItems: "center",
+
+        elevation: 4
+
 
     },
 
 
 
+
+    icon: {
+
+        fontSize: 25
+
+    },
+
+
+
+
     number: {
+
 
         fontSize: 25,
 
@@ -615,77 +852,101 @@ const styles = StyleSheet.create({
 
         color: "#4F46E5"
 
-    },
-
-
-
-    progressCard: {
-
-        backgroundColor: "#176ca5",
-
-        padding: 20,
-
-        borderRadius: 20,
-
-        marginTop: 20
 
     },
 
-
-
-    progressTitle: {
-
-        color: "#fff",
-
-        fontSize: 16
-
-    },
-
-
-
-    percent: {
-
-        color: "#fff",
-
-        fontSize: 40,
-
-        fontWeight: "bold"
-
-    },
 
 
 
     section: {
 
+
         fontSize: 20,
 
         fontWeight: "bold",
 
-        marginVertical: 20
+        marginHorizontal: 20,
+
+        marginVertical: 15
+
 
     },
+
+
+
+
+
+    chartCard: {
+
+
+        marginHorizontal: 20,
+
+        padding: 10,
+
+        borderRadius: 25,
+
+        alignItems: "center",
+
+        elevation: 3
+
+
+    },
+
+
 
 
 
     item: {
 
+
+        marginHorizontal: 20,
+
         padding: 18,
 
-        borderRadius: 15,
+        borderRadius: 20,
 
-        marginBottom: 12
+        marginBottom: 12,
+
+        flexDirection: "row",
+
+        justifyContent: "space-between",
+
+        alignItems: "center"
+
 
     },
 
 
 
+
+
     name: {
+
 
         fontSize: 17,
 
         fontWeight: "bold"
 
+
+    },
+
+
+
+
+    empty: {
+
+
+        margin: 20,
+
+        padding: 30,
+
+        borderRadius: 20,
+
+        alignItems: "center"
+
+
     }
+
 
 
 });

@@ -1,194 +1,90 @@
-import React, {
-    useEffect,
-    useState,
-    useContext
-} from "react";
-
-
+import React, { useEffect, useState, useContext } from "react";
 import {
     View,
     Text,
     StyleSheet,
-    ScrollView
+    ScrollView,
 } from "react-native";
 
+import { Calendar } from "react-native-calendars";
+import { LinearGradient } from "expo-linear-gradient";
 
-import {
-    Calendar
-} from "react-native-calendars";
-
-
-import {
-    auth
-} from "../firebase/firebaseConfig";
-
-
-import {
-    getMedicineHistory
-} from "../services/historyService";
-
-
-import {
-    ThemeContext
-} from "../context/ThemeContext";
-
-
-
-
+import { auth } from "../firebase/firebaseConfig";
+import { getMedicineHistory } from "../services/historyService";
+import { ThemeContext } from "../context/ThemeContext";
 
 export default function CalendarScreen() {
 
+    const { colors } = useContext(ThemeContext);
 
+    const [history, setHistory] = useState<any[]>([]);
 
-    const {
-        colors
-    } = useContext(ThemeContext);
-
-
-
-
-    const [history, setHistory] =
-        useState<any[]>([]);
-
-
-
-    const [selectedDate, setSelectedDate] =
-        useState(
-            new Date()
-                .toISOString()
-                .split("T")[0]
-        );
-
-
-
-
-
+    const [selectedDate, setSelectedDate] = useState(
+        new Date().toISOString().split("T")[0]
+    );
 
     useEffect(() => {
-
-
         loadHistory();
-
-
     }, []);
-
-
-
-
-
-
-
 
     const loadHistory = async () => {
 
+        const user = auth.currentUser;
 
-        const user =
-            auth.currentUser;
+        if (!user) return;
 
+        const data = await getMedicineHistory(user.uid);
 
-
-        if (user) {
-
-
-            const data =
-                await getMedicineHistory(
-                    user.uid
-                );
-
-
-            setHistory(data);
-
-
-        }
-
+        setHistory(data);
 
     };
 
+    const selectedMedicines = history.filter(item => {
 
-
-
-
-
-
-
-
-    const selectedMedicines =
-        history.filter(item => {
-
-
-            let itemDate;
-
-
-
-            if (item.date?.toDate) {
-
-                itemDate =
-                    item.date
-                        .toDate()
-                        .toISOString()
-                        .split("T")[0];
-
-            }
-
-            else if (item.date) {
-
-                itemDate =
-                    new Date(item.date)
-                        .toISOString()
-                        .split("T")[0];
-
-            }
-
-
-
-            return itemDate === selectedDate;
-
-
-        });
-
-
-
-
-
-
-
-
-
-    const markedDates: any = {};
-
-
-
-
-    history.forEach(item => {
-
-
-        let date;
-
-
+        let date = "";
 
         if (item.date?.toDate) {
 
-            date =
-                item.date
-                    .toDate()
-                    .toISOString()
-                    .split("T")[0];
+            date = item.date.toDate().toISOString().split("T")[0];
 
-        }
-        else if (item.date) {
+        } else if (item.date) {
 
-
-            date =
-                new Date(item.date)
-                    .toISOString()
-                    .split("T")[0];
+            date = new Date(item.date).toISOString().split("T")[0];
 
         }
 
+        return date === selectedDate;
 
+    });
+
+    const taken = selectedMedicines.filter(
+        item =>
+            item.status === "Taken" ||
+            item.status === "Completed"
+    ).length;
+
+    const missed = selectedMedicines.filter(
+        item =>
+            item.status === "Missed"
+    ).length;
+
+    const markedDates: any = {};
+
+    history.forEach(item => {
+
+        let date = "";
+
+        if (item.date?.toDate) {
+
+            date = item.date.toDate().toISOString().split("T")[0];
+
+        } else if (item.date) {
+
+            date = new Date(item.date).toISOString().split("T")[0];
+
+        }
 
         if (date) {
-
 
             markedDates[date] = {
 
@@ -196,23 +92,14 @@ export default function CalendarScreen() {
 
                 dotColor:
                     item.status === "Missed"
-                        ?
-                        "red"
-                        :
-                        "green"
+                        ? "#EF4444"
+                        : "#10B981"
 
             };
 
-
         }
 
-
-
     });
-
-
-
-
 
     markedDates[selectedDate] = {
 
@@ -224,194 +111,223 @@ export default function CalendarScreen() {
 
     };
 
-
-
-
-
-
-
-
-
     return (
 
-
         <ScrollView
-
             style={[
                 styles.container,
                 {
-                    backgroundColor:
-                        colors.background
+                    backgroundColor: colors.background
                 }
             ]}
-
+            showsVerticalScrollIndicator={false}
         >
 
-
-
-
-            <Text
-
-                style={[
-                    styles.title,
-                    {
-                        color:
-                            colors.text
-                    }
-                ]}
-
+            <LinearGradient
+                colors={["#a1e7df", "#62c5c7"]}
+                style={styles.header}
             >
 
-                Medicine Calendar 📅
+                <Text style={styles.title}>
+                    Medicine Calendar 📅
+                </Text>
 
-            </Text>
+                <Text style={styles.subtitle}>
+                    Track all medicine activities
+                </Text>
 
+            </LinearGradient>
 
-
-
-
-
-
-
-            <Calendar
-
-
-                onDayPress={(day) => {
-
-
-                    setSelectedDate(
-                        day.dateString
-                    );
-
-
-                }}
-
-
-
-                markedDates={
-                    markedDates
-                }
-
-
-
-                theme={{
-
-                    calendarBackground:
-                        colors.card,
-
-
-                    dayTextColor:
-                        colors.text,
-
-
-                    monthTextColor:
-                        colors.text,
-
-
-                    arrowColor:
-                        "#4F46E5"
-
-
-                }}
-
-
-
-            />
-
-
-
-
-
-
-
-
-
-            <Text
-
+            <View
                 style={[
-                    styles.dateTitle,
+                    styles.calendarCard,
                     {
-                        color:
-                            colors.text
+                        backgroundColor: colors.card
                     }
                 ]}
-
             >
 
-                {selectedDate}
+                <Calendar
 
-            </Text>
+                    onDayPress={(day) =>
+                        setSelectedDate(day.dateString)
+                    }
 
+                    markedDates={markedDates}
 
+                    theme={{
 
+                        calendarBackground: colors.card,
 
+                        dayTextColor: colors.text,
 
+                        monthTextColor: colors.text,
 
+                        textSectionTitleColor: "#6B7280",
 
+                        arrowColor: "#4F46E5",
 
+                        todayTextColor: "#4F46E5",
 
-            {
-                selectedMedicines.length === 0
+                        selectedDayBackgroundColor: "#4F46E5",
 
-                    ?
+                        selectedDayTextColor: "#fff"
 
-                    <Text
+                    }}
 
-                        style={{
-                            color:
-                                colors.text,
-                            textAlign: "center",
-                            marginTop: 20
-                        }}
+                />
 
-                    >
+            </View>
 
-                        No medicine activity 💊
+            <View style={styles.summaryRow}>
 
+                <View
+                    style={[
+                        styles.summaryCard,
+                        {
+                            backgroundColor: colors.card
+                        }
+                    ]}
+                >
+
+                    <Text style={styles.summaryIcon}>
+                        ✅
                     </Text>
 
+                    <Text style={styles.summaryNumber}>
+                        {taken}
+                    </Text>
 
+                    <Text
+                        style={{
+                            color: colors.text
+                        }}
+                    >
+                        Taken
+                    </Text>
+
+                </View>
+
+                <View
+                    style={[
+                        styles.summaryCard,
+                        {
+                            backgroundColor: colors.card
+                        }
+                    ]}
+                >
+
+                    <Text style={styles.summaryIcon}>
+                        ❌
+                    </Text>
+
+                    <Text style={styles.summaryNumber}>
+                        {missed}
+                    </Text>
+
+                    <Text
+                        style={{
+                            color: colors.text
+                        }}
+                    >
+                        Missed
+                    </Text>
+
+                </View>
+
+            </View>
+
+            <Text
+                style={[
+                    styles.activityTitle,
+                    {
+                        color: colors.text
+                    }
+                ]}
+            >
+
+                Activity on {selectedDate}
+
+            </Text>
+
+            {
+
+                selectedMedicines.length === 0 ?
+
+                    <View
+                        style={[
+                            styles.emptyCard,
+                            {
+                                backgroundColor: colors.card
+                            }
+                        ]}
+                    >
+
+                        <Text style={styles.emptyIcon}>
+                            📭
+                        </Text>
+
+                        <Text
+                            style={{
+                                color: colors.text,
+                                fontSize: 17,
+                                fontWeight: "600"
+                            }}
+                        >
+
+                            No medicine activity
+
+                        </Text>
+
+                    </View>
 
                     :
 
-
-
                     selectedMedicines.map(item => (
-
 
                         <View
 
                             key={item.id}
 
                             style={[
-                                styles.card,
+                                styles.activityCard,
                                 {
-                                    backgroundColor:
-                                        colors.card
-                                }
+                                    backgroundColor: colors.card,
+                                    borderLeftColor:
+                                        item.status === "Missed"
+                                            ? "#EF4444"
+                                            : "#10B981",
+                                },
                             ]}
 
                         >
 
+                            <View>
 
-                            <Text
+                                <Text
+                                    style={[
+                                        styles.medicineName,
+                                        {
+                                            color: colors.text
+                                        }
+                                    ]}
+                                >
 
-                                style={[
-                                    styles.name,
-                                    {
-                                        color:
-                                            colors.text
-                                    }
-                                ]}
+                                    💊 {item.medicineName}
 
-                            >
+                                </Text>
 
-                                💊 {item.medicineName}
+                                <Text
+                                    style={{
+                                        color: colors.subText
+                                    }}
+                                >
 
-                            </Text>
+                                    Daily Medicine
 
+                                </Text>
 
-
+                            </View>
 
                             <Text
 
@@ -419,110 +335,135 @@ export default function CalendarScreen() {
 
                                     color:
                                         item.status === "Missed"
-                                            ?
-                                            "#EF4444"
-                                            :
-                                            "#10B981"
+                                            ? "#EF4444"
+                                            : "#10B981",
+
+                                    fontWeight: "bold"
 
                                 }}
 
                             >
 
                                 {
+
                                     item.status === "Missed"
-                                        ?
-                                        "❌ Missed"
-                                        :
-                                        "✅ Taken"
+
+                                        ? "❌ Missed"
+
+                                        : "✅ Taken"
+
                                 }
 
                             </Text>
 
-
-
                         </View>
-
-
 
                     ))
 
-
             }
-
-
-
-
 
         </ScrollView>
 
-
     );
-
 
 }
 
-
-
-
-
-
-
 const styles = StyleSheet.create({
 
-
     container: {
-
-        flex: 1,
-
-        padding: 20
-
+        flex: 1
     },
 
+    header: {
+        paddingTop: 55,
+        paddingBottom: 35,
+        paddingHorizontal: 25,
+        borderBottomLeftRadius: 35,
+        borderBottomRightRadius: 35
+    },
 
     title: {
-
-        fontSize: 28,
-
+        fontSize: 30,
         fontWeight: "bold",
-
-        marginTop: 30,
-
-        marginBottom: 20
-
+        color: "#111827"
     },
 
-
-    dateTitle: {
-
-        fontSize: 20,
-
-        fontWeight: "bold",
-
-        marginVertical: 20
-
+    subtitle: {
+        marginTop: 8,
+        fontSize: 15,
+        color: "#374151"
     },
 
+    calendarCard: {
+        marginHorizontal: 20,
+        marginTop: -30,
+        borderRadius: 24,
+        padding: 12,
+        elevation: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+    },
 
-    card: {
+    summaryRow: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        marginHorizontal: 20
+    },
 
+    summaryCard: {
+        width: "46%",
         padding: 18,
-
-        borderRadius: 15,
-
-        marginBottom: 12
-
+        borderRadius: 20,
+        alignItems: "center",
+        elevation: 3
     },
 
+    summaryIcon: {
+        fontSize: 28
+    },
 
-    name: {
-
-        fontSize: 17,
-
+    summaryNumber: {
+        fontSize: 28,
         fontWeight: "bold",
+        color: "#4F46E5",
+        marginVertical: 5
+    },
 
-        marginBottom: 8
+    activityTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginHorizontal: 20,
+        marginTop: 25,
+        marginBottom: 15
+    },
+    activityCard: {
+        marginHorizontal: 20,
+        marginBottom: 12,
+        padding: 18,
+        borderRadius: 18,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderLeftWidth: 5,
+    },
 
+    medicineName: {
+        fontSize: 17,
+        fontWeight: "bold"
+    },
+
+    emptyCard: {
+        margin: 20,
+        padding: 35,
+        borderRadius: 20,
+        alignItems: "center"
+    },
+
+    emptyIcon: {
+        fontSize: 55,
+        marginBottom: 12
     }
-
 
 });
